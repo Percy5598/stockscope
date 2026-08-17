@@ -138,16 +138,20 @@ for ticker, data in stock_data.items():
 metrics_df = pd.DataFrame(metrics)
 
 # KPI Cards
-
 best_stock = metrics_df.loc[
     metrics_df["Return (%)"].idxmax()
 ]
 
-highest_risk = metrics_df.loc[
-    metrics_df["Volatility (%)"].idxmax()
+worst_stock = metrics_df.loc[
+    metrics_df["Return (%)"].idxmin()
 ]
 
-col1, col2, col3 = st.columns(3)
+avg_return = metrics_df["Return (%)"].mean()
+
+avg_volatility = metrics_df["Volatility (%)"].mean()
+
+
+col1, col2, col3, col4 = st.columns(4)
 
 with col1:
     st.metric(
@@ -158,64 +162,22 @@ with col1:
 
 with col2:
     st.metric(
-        "Highest Volatility",
-        highest_risk["Ticker"],
-        f'{highest_risk["Volatility (%)"]:.2f}%'
+        "Worst Performer",
+        worst_stock["Ticker"],
+        f'{worst_stock["Return (%)"]:.2f}%'
     )
 
 with col3:
     st.metric(
-        "Stocks Compared",
-        len(metrics_df)
+        "Average Return",
+        f"{avg_return:.2f}%"
     )
 
-metrics_df = metrics_df.sort_values(
-    "Return (%)",
-    ascending=False
-)
-
-
-st.dataframe(
-    metrics_df,
-    use_container_width=True,
-    hide_index=True
-)
-
-
-# Individual stock
-
-st.header("Stock Price")
-
-
-selected_stock = st.selectbox(
-    "Choose a stock",
-    tickers
-)
-
-
-data = stock_data[selected_stock]
-
-
-fig_price = px.line(
-    data,
-    x=data.index,
-    y="Close",
-    title=f"{selected_stock} Price"
-)
-
-
-fig_price.update_layout(
-    xaxis_title="Date",
-    yaxis_title="Price"
-)
-
-
-st.plotly_chart(
-    fig_price,
-    use_container_width=True
-)
-
-
+with col4:
+    st.metric(
+        "Average Volatility",
+        f"{avg_volatility:.2f}%"
+    )
 # Volume
 
 st.header("Trading Volume")

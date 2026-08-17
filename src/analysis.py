@@ -29,6 +29,8 @@ def calculate_metrics(ticker, data):
         "Current Price": data["Close"].iloc[-1],
         "Return (%)": calculate_return(data),
         "Volatility (%)": calculate_volatility(data),
+        "Sharpe Ratio": calculate_sharpe_ratio(data),
+        "Max Drawdown (%)": calculate_max_drawdown(data),
         "Average Volume": data["Volume"].mean()
     }
 
@@ -57,3 +59,13 @@ def calculate_metrics(ticker, data):
         "Sharpe Ratio": calculate_sharpe_ratio(data),
         "Average Volume": data["Volume"].mean()
     }
+
+def calculate_max_drawdown(data):
+
+    prices = data["Close"]
+
+    running_max = prices.cummax()
+
+    drawdown = (prices - running_max) / running_max
+
+    return drawdown.min() * 100    
