@@ -137,6 +137,38 @@ for ticker, data in stock_data.items():
 
 metrics_df = pd.DataFrame(metrics)
 
+# KPI Cards
+
+best_stock = metrics_df.loc[
+    metrics_df["Return (%)"].idxmax()
+]
+
+highest_risk = metrics_df.loc[
+    metrics_df["Volatility (%)"].idxmax()
+]
+
+col1, col2, col3 = st.columns(3)
+
+with col1:
+    st.metric(
+        "Best Performer",
+        best_stock["Ticker"],
+        f'{best_stock["Return (%)"]:.2f}%'
+    )
+
+with col2:
+    st.metric(
+        "Highest Volatility",
+        highest_risk["Ticker"],
+        f'{highest_risk["Volatility (%)"]:.2f}%'
+    )
+
+with col3:
+    st.metric(
+        "Stocks Compared",
+        len(metrics_df)
+    )
+
 metrics_df = metrics_df.sort_values(
     "Return (%)",
     ascending=False
@@ -199,5 +231,29 @@ fig_volume = px.bar(
 
 st.plotly_chart(
     fig_volume,
+    use_container_width=True
+)
+
+# Risk vs Return
+
+st.header("Risk vs Return")
+
+risk_return = metrics_df.copy()
+
+fig_risk = px.scatter(
+    risk_return,
+    x="Volatility (%)",
+    y="Return (%)",
+    text="Ticker",
+    size="Average Volume",
+    title="Risk vs Return"
+)
+
+fig_risk.update_traces(
+    textposition="top center"
+)
+
+st.plotly_chart(
+    fig_risk,
     use_container_width=True
 )
