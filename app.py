@@ -6,9 +6,9 @@ from src.data import get_single_stock
 from src.analysis import calculate_metrics
 
 
-# --------------------------------------------------
-# Page configuration
-# --------------------------------------------------
+# ==================================================
+# PAGE CONFIGURATION
+# ==================================================
 
 st.set_page_config(
     page_title="StockScope",
@@ -17,9 +17,9 @@ st.set_page_config(
 )
 
 
-# --------------------------------------------------
-# Header
-# --------------------------------------------------
+# ==================================================
+# HEADER
+# ==================================================
 
 st.title("📈 StockScope")
 
@@ -28,95 +28,101 @@ st.markdown(
     **Stock Performance & Risk Analytics**
 
     Compare stocks using historical performance, volatility,
-    Sharpe ratio, and maximum drawdown.
+    Sharpe ratio, drawdown, and correlation.
     """
 )
 
 
-# --------------------------------------------------
-# Sidebar
-# --------------------------------------------------
+# ==================================================
+# SIDEBAR
+# ==================================================
 
 st.sidebar.header("Dashboard Settings")
 
 available_tickers = [
     # Technology
-    "AAPL",      # Apple
-    "MSFT",      # Microsoft
-    "NVDA",      # NVIDIA
-    "GOOGL",     # Alphabet
-    "META",      # Meta
-    "AMZN",      # Amazon
-    "AVGO",      # Broadcom
-    "ORCL",      # Oracle
-    "ADBE",      # Adobe
-    "CRM",       # Salesforce
-    "AMD",       # AMD
-    "INTC",      # Intel
-    "CSCO",      # Cisco
-    "QCOM",      # Qualcomm
-    "IBM",       # IBM
+    "AAPL",
+    "MSFT",
+    "NVDA",
+    "GOOGL",
+    "META",
+    "AMZN",
+    "AVGO",
+    "ORCL",
+    "ADBE",
+    "CRM",
+    "AMD",
+    "INTC",
+    "CSCO",
+    "QCOM",
+    "IBM",
 
     # Consumer
-    "TSLA",      # Tesla
-    "NFLX",      # Netflix
-    "NKE",       # Nike
-    "MCD",       # McDonald's
-    "SBUX",      # Starbucks
-    "KO",        # Coca-Cola
-    "PEP",       # PepsiCo
-    "WMT",       # Walmart
-    "COST",      # Costco
+    "TSLA",
+    "NFLX",
+    "NKE",
+    "MCD",
+    "SBUX",
+    "KO",
+    "PEP",
+    "WMT",
+    "COST",
 
     # Financial
-    "JPM",       # JPMorgan Chase
-    "BAC",       # Bank of America
-    "GS",        # Goldman Sachs
-    "MS",        # Morgan Stanley
-    "V",         # Visa
-    "MA",        # Mastercard
-    "BLK",       # BlackRock
-    "C",         # Citigroup
+    "JPM",
+    "BAC",
+    "GS",
+    "MS",
+    "V",
+    "MA",
+    "BLK",
+    "C",
 
     # Healthcare
-    "LLY",       # Eli Lilly
-    "JNJ",       # Johnson & Johnson
-    "PFE",       # Pfizer
-    "MRK",       # Merck
-    "ABBV",      # AbbVie
-    "UNH",       # UnitedHealth
+    "LLY",
+    "JNJ",
+    "PFE",
+    "MRK",
+    "ABBV",
+    "UNH",
 
     # Energy
-    "XOM",       # Exxon Mobil
-    "CVX",       # Chevron
-    "COP",       # ConocoPhillips
+    "XOM",
+    "CVX",
+    "COP",
 
     # Industrial
-    "CAT",       # Caterpillar
-    "GE",        # GE Aerospace
-    "HON",       # Honeywell
-    "BA",        # Boeing
-    "UPS",       # UPS
-    "RTX",       # RTX
+    "CAT",
+    "GE",
+    "HON",
+    "BA",
+    "UPS",
+    "RTX",
 
     # Communication
-    "DIS",       # Disney
-    "CMCSA",     # Comcast
-    "T",         # AT&T
-    "VZ",        # Verizon
+    "DIS",
+    "CMCSA",
+    "T",
+    "VZ",
 
     # ETFs / Benchmarks
-    "SPY",       # S&P 500
-    "QQQ",       # Nasdaq 100
-    "DIA",       # Dow Jones
-    "IWM",       # Russell 2000
+    "SPY",
+    "QQQ",
+    "DIA",
+    "IWM",
 ]
+
 
 tickers = st.sidebar.multiselect(
     "Select stocks",
     available_tickers,
-    default=["AAPL", "MSFT", "NVDA"]
+    default=[
+        "AAPL",
+        "MSFT",
+        "NVDA"
+    ]
 )
+
 
 period = st.sidebar.selectbox(
     "Time period",
@@ -126,26 +132,39 @@ period = st.sidebar.selectbox(
         "6mo",
         "1y",
         "2y",
-        "5y",
+        "5y"
     ],
     index=3
 )
 
 
-# --------------------------------------------------
-# Validate selection
-# --------------------------------------------------
+benchmark = st.sidebar.selectbox(
+    "Benchmark",
+    [
+        "SPY",
+        "QQQ",
+        "DIA",
+        "IWM"
+    ]
+)
+
+
+# ==================================================
+# VALIDATE STOCK SELECTION
+# ==================================================
 
 if not tickers:
 
-    st.warning("Please select at least one stock.")
+    st.warning(
+        "Please select at least one stock."
+    )
 
     st.stop()
 
 
-# --------------------------------------------------
-# Load data
-# --------------------------------------------------
+# ==================================================
+# LOAD STOCK DATA
+# ==================================================
 
 stock_data = {}
 
@@ -161,6 +180,7 @@ with st.spinner("Loading market data..."):
             )
 
             if not data.empty:
+
                 stock_data[ticker] = data
 
         except Exception as error:
@@ -172,14 +192,32 @@ with st.spinner("Loading market data..."):
 
 if not stock_data:
 
-    st.error("No stock data could be loaded.")
+    st.error(
+        "No stock data could be loaded."
+    )
 
     st.stop()
 
 
-# --------------------------------------------------
-# Calculate metrics
-# --------------------------------------------------
+# ==================================================
+# LOAD BENCHMARK
+# ==================================================
+
+try:
+
+    benchmark_data = get_single_stock(
+        benchmark,
+        period
+    )
+
+except Exception:
+
+    benchmark_data = pd.DataFrame()
+
+
+# ==================================================
+# CALCULATE METRICS
+# ==================================================
 
 metrics = []
 
@@ -204,23 +242,31 @@ for ticker, data in stock_data.items():
 metrics_df = pd.DataFrame(metrics)
 
 
-# --------------------------------------------------
-# KPI SECTION
-# --------------------------------------------------
+# ==================================================
+# PORTFOLIO OVERVIEW
+# ==================================================
 
-st.header("Portfolio Overview")
+st.header("📊 Portfolio Overview")
+
 
 best_stock = metrics_df.loc[
     metrics_df["Return (%)"].idxmax()
 ]
 
+
 worst_stock = metrics_df.loc[
     metrics_df["Return (%)"].idxmin()
 ]
 
-average_return = metrics_df["Return (%)"].mean()
 
-average_volatility = metrics_df["Volatility (%)"].mean()
+average_return = metrics_df[
+    "Return (%)"
+].mean()
+
+
+average_volatility = metrics_df[
+    "Volatility (%)"
+].mean()
 
 
 col1, col2, col3, col4 = st.columns(4)
@@ -260,11 +306,12 @@ with col4:
     )
 
 
-# --------------------------------------------------
-# Performance Comparison
-# --------------------------------------------------
+# ==================================================
+# PERFORMANCE COMPARISON
+# ==================================================
 
-st.header("Performance Comparison")
+st.header("📈 Performance Comparison")
+
 
 normalized_data = pd.DataFrame()
 
@@ -280,6 +327,22 @@ for ticker, data in stock_data.items():
     normalized_data[ticker] = normalized_prices
 
 
+# Add benchmark
+
+if not benchmark_data.empty:
+
+    benchmark_prices = benchmark_data["Close"]
+
+    benchmark_normalized = (
+        benchmark_prices /
+        benchmark_prices.iloc[0]
+    ) * 100
+
+    normalized_data[benchmark] = (
+        benchmark_normalized
+    )
+
+
 normalized_data = normalized_data.dropna()
 
 
@@ -289,16 +352,15 @@ fig_performance = px.line(
     y=normalized_data.columns,
     title="Normalized Performance",
     labels={
-        "value": "Growth of €100",
+        "value": "Growth of 100",
         "Date": "Date",
-        "variable": "Stock"
+        "variable": "Asset"
     }
 )
 
 
 fig_performance.update_layout(
-    hovermode="x unified",
-    legend_title="Stock"
+    hovermode="x unified"
 )
 
 
@@ -309,15 +371,16 @@ st.plotly_chart(
 
 
 st.caption(
-    "All stocks are normalized to 100 at the beginning of the selected period."
+    "All assets are normalized to 100 at the beginning "
+    "of the selected period."
 )
 
 
-# --------------------------------------------------
-# Metrics Table
-# --------------------------------------------------
+# ==================================================
+# PERFORMANCE & RISK METRICS
+# ==================================================
 
-st.header("Performance & Risk Metrics")
+st.header("📋 Performance & Risk Metrics")
 
 
 metrics_display = metrics_df.copy()
@@ -337,7 +400,10 @@ for column in numeric_columns:
 
     if column in metrics_display.columns:
 
-        metrics_display[column] = metrics_display[column].round(2)
+        metrics_display[column] = (
+            metrics_display[column]
+            .round(2)
+        )
 
 
 metrics_display = metrics_display.sort_values(
@@ -353,11 +419,54 @@ st.dataframe(
 )
 
 
-# --------------------------------------------------
-# Risk vs Return
-# --------------------------------------------------
+# ==================================================
+# STOCK RANKING
+# ==================================================
 
-st.header("Risk vs Return")
+st.header("🏆 Stock Ranking")
+
+
+ranking = metrics_df.copy()
+
+
+ranking["Rank"] = (
+    ranking["Return (%)"]
+    .rank(
+        ascending=False,
+        method="min"
+    )
+    .astype(int)
+)
+
+
+ranking = ranking.sort_values(
+    "Rank"
+)
+
+
+ranking_columns = [
+    "Rank",
+    "Ticker",
+    "Return (%)",
+    "Volatility (%)",
+    "Sharpe Ratio",
+    "Max Drawdown (%)"
+]
+
+
+st.dataframe(
+    ranking[ranking_columns],
+    use_container_width=True,
+    hide_index=True
+)
+
+
+# ==================================================
+# RISK VS RETURN
+# ==================================================
+
+st.header("⚖️ Risk vs Return")
+
 
 risk_return = metrics_df.copy()
 
@@ -370,19 +479,16 @@ fig_risk = px.scatter(
     size="Average Volume",
     title="Risk vs Return",
     labels={
-        "Volatility (%)": "Annualized Volatility (%)",
-        "Return (%)": "Return (%)"
+        "Volatility (%)":
+            "Annualized Volatility (%)",
+        "Return (%)":
+            "Return (%)"
     }
 )
 
 
 fig_risk.update_traces(
     textposition="top center"
-)
-
-
-fig_risk.update_layout(
-    hovermode="closest"
 )
 
 
@@ -393,16 +499,57 @@ st.plotly_chart(
 
 
 st.caption(
-    "Stocks further right have higher volatility. "
-    "Stocks higher up have higher returns."
+    "Higher volatility means greater historical price variability."
 )
 
 
-# --------------------------------------------------
-# Individual Stock Analysis
-# --------------------------------------------------
+# ==================================================
+# CORRELATION
+# ==================================================
 
-st.header("Individual Stock Analysis")
+st.header("🔗 Stock Correlation")
+
+
+returns = pd.DataFrame()
+
+
+for ticker, data in stock_data.items():
+
+    returns[ticker] = (
+        data["Close"]
+        .pct_change()
+    )
+
+
+correlation = returns.corr()
+
+
+fig_corr = px.imshow(
+    correlation,
+    text_auto=".2f",
+    title="Daily Return Correlation",
+    labels={
+        "color": "Correlation"
+    }
+)
+
+
+st.plotly_chart(
+    fig_corr,
+    use_container_width=True
+)
+
+
+st.caption(
+    "Values closer to 1 indicate stronger positive correlation."
+)
+
+
+# ==================================================
+# INDIVIDUAL STOCK ANALYSIS
+# ==================================================
+
+st.header("🔍 Individual Stock Analysis")
 
 
 selected_stock = st.selectbox(
@@ -411,17 +558,19 @@ selected_stock = st.selectbox(
 )
 
 
-selected_data = stock_data[selected_stock]
+selected_data = stock_data[
+    selected_stock
+].copy()
 
-
-# --------------------------------------------------
-# Stock summary
-# --------------------------------------------------
 
 selected_metrics = metrics_df[
     metrics_df["Ticker"] == selected_stock
 ].iloc[0]
 
+
+# ==================================================
+# STOCK SUMMARY
+# ==================================================
 
 col1, col2, col3, col4 = st.columns(4)
 
@@ -458,21 +607,54 @@ with col4:
     )
 
 
-# --------------------------------------------------
-# Price Chart
-# --------------------------------------------------
+# ==================================================
+# MOVING AVERAGES
+# ==================================================
 
-st.subheader(f"{selected_stock} Price")
+selected_data["MA20"] = (
+    selected_data["Close"]
+    .rolling(20)
+    .mean()
+)
+
+
+selected_data["MA50"] = (
+    selected_data["Close"]
+    .rolling(50)
+    .mean()
+)
+
+
+# ==================================================
+# PRICE CHART
+# ==================================================
+
+st.subheader(
+    f"{selected_stock} Price & Moving Averages"
+)
+
+
+price_chart = selected_data[
+    [
+        "Close",
+        "MA20",
+        "MA50"
+    ]
+].reset_index()
 
 
 fig_price = px.line(
-    selected_data,
-    x=selected_data.index,
-    y="Close",
-    title=f"{selected_stock} Closing Price",
+    price_chart,
+    x="Date",
+    y=[
+        "Close",
+        "MA20",
+        "MA50"
+    ],
+    title=f"{selected_stock} Price & Moving Averages",
     labels={
-        "Close": "Price",
-        "Date": "Date"
+        "value": "Price",
+        "variable": "Indicator"
     }
 )
 
@@ -488,11 +670,13 @@ st.plotly_chart(
 )
 
 
-# --------------------------------------------------
-# Volume Chart
-# --------------------------------------------------
+# ==================================================
+# TRADING VOLUME
+# ==================================================
 
-st.subheader(f"{selected_stock} Trading Volume")
+st.subheader(
+    f"{selected_stock} Trading Volume"
+)
 
 
 fig_volume = px.bar(
@@ -513,18 +697,29 @@ st.plotly_chart(
 )
 
 
-# --------------------------------------------------
-# Drawdown Chart
-# --------------------------------------------------
+# ==================================================
+# MAXIMUM DRAWDOWN
+# ==================================================
 
-st.subheader(f"{selected_stock} Drawdown")
+st.subheader(
+    f"{selected_stock} Drawdown"
+)
 
 
-running_max = selected_data["Close"].cummax()
+running_max = (
+    selected_data["Close"]
+    .cummax()
+)
+
 
 drawdown = (
-    selected_data["Close"] - running_max
-) / running_max * 100
+    (
+        selected_data["Close"]
+        - running_max
+    )
+    / running_max
+    * 100
+)
 
 
 drawdown_df = pd.DataFrame(
@@ -538,13 +733,11 @@ fig_drawdown = px.area(
     drawdown_df,
     x=drawdown_df.index,
     y="Drawdown (%)",
-    title=f"{selected_stock} Drawdown"
-)
-
-
-fig_drawdown.update_layout(
-    yaxis_title="Drawdown (%)",
-    xaxis_title="Date"
+    title=f"{selected_stock} Drawdown",
+    labels={
+        "Drawdown (%)":
+            "Drawdown (%)"
+    }
 )
 
 
@@ -554,13 +747,120 @@ st.plotly_chart(
 )
 
 
-# --------------------------------------------------
-# Footer
-# --------------------------------------------------
+# ==================================================
+# ROLLING VOLATILITY
+# ==================================================
+
+st.subheader(
+    f"{selected_stock} 30-Day Rolling Volatility"
+)
+
+
+selected_data["Daily Return"] = (
+    selected_data["Close"]
+    .pct_change()
+)
+
+
+selected_data["Rolling Volatility"] = (
+    selected_data["Daily Return"]
+    .rolling(30)
+    .std()
+    * (252 ** 0.5)
+    * 100
+)
+
+
+fig_volatility = px.line(
+    selected_data,
+    x=selected_data.index,
+    y="Rolling Volatility",
+    title=(
+        f"{selected_stock} "
+        "30-Day Rolling Volatility"
+    ),
+    labels={
+        "Rolling Volatility":
+            "Annualized Volatility (%)",
+        "Date":
+            "Date"
+    }
+)
+
+
+fig_volatility.update_layout(
+    hovermode="x unified"
+)
+
+
+st.plotly_chart(
+    fig_volatility,
+    use_container_width=True
+)
+
+
+# ==================================================
+# SIMPLE ANALYTICAL INTERPRETATION
+# ==================================================
+
+st.header("💡 Analytics Summary")
+
+
+sharpe = selected_metrics[
+    "Sharpe Ratio"
+]
+
+
+drawdown_value = selected_metrics[
+    "Max Drawdown (%)"
+]
+
+
+if sharpe > 1:
+
+    st.success(
+        "The stock showed strong "
+        "risk-adjusted performance during "
+        "the selected period."
+    )
+
+elif sharpe > 0:
+
+    st.info(
+        "The stock showed positive "
+        "risk-adjusted performance during "
+        "the selected period."
+    )
+
+else:
+
+    st.warning(
+        "The stock showed negative "
+        "risk-adjusted performance during "
+        "the selected period."
+    )
+
+
+if drawdown_value < -30:
+
+    st.warning(
+        f"The stock experienced a significant "
+        f"maximum drawdown of "
+        f"{drawdown_value:.2f}% during the "
+        "selected period."
+    )
+
+
+# ==================================================
+# FOOTER
+# ==================================================
 
 st.divider()
 
+
 st.caption(
-    "StockScope is an educational analytics tool. "
-    "Market data may be delayed and should not be considered investment advice."
+    """
+    StockScope is an educational financial analytics tool.
+    Market data may be delayed. The analysis is not investment advice.
+    """
 )
