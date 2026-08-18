@@ -6,9 +6,7 @@ from src.data import get_single_stock
 from src.analysis import calculate_metrics
 
 
-# ==================================================
 # PAGE CONFIGURATION
-# ==================================================
 
 st.set_page_config(
     page_title="StockScope",
@@ -17,9 +15,7 @@ st.set_page_config(
 )
 
 
-# ==================================================
 # HEADER
-# ==================================================
 
 st.title("📈 StockScope")
 
@@ -32,10 +28,7 @@ st.markdown(
     """
 )
 
-
-# ==================================================
 # SIDEBAR
-# ==================================================
 
 st.sidebar.header("Dashboard Settings")
 
@@ -161,10 +154,7 @@ if not tickers:
 
     st.stop()
 
-
-# ==================================================
 # LOAD STOCK DATA
-# ==================================================
 
 stock_data = {}
 
@@ -199,9 +189,7 @@ if not stock_data:
     st.stop()
 
 
-# ==================================================
 # LOAD BENCHMARK
-# ==================================================
 
 try:
 
@@ -215,9 +203,7 @@ except Exception:
     benchmark_data = pd.DataFrame()
 
 
-# ==================================================
 # CALCULATE METRICS
-# ==================================================
 
 metrics = []
 
@@ -241,10 +227,7 @@ for ticker, data in stock_data.items():
 
 metrics_df = pd.DataFrame(metrics)
 
-
-# ==================================================
 # PORTFOLIO OVERVIEW
-# ==================================================
 
 st.header("📊 Portfolio Overview")
 
@@ -305,10 +288,7 @@ with col4:
         f"{average_volatility:.2f}%"
     )
 
-
-# ==================================================
 # PERFORMANCE COMPARISON
-# ==================================================
 
 st.header("📈 Performance Comparison")
 
@@ -375,10 +355,7 @@ st.caption(
     "of the selected period."
 )
 
-
-# ==================================================
 # PERFORMANCE & RISK METRICS
-# ==================================================
 
 st.header("📋 Performance & Risk Metrics")
 
@@ -419,9 +396,7 @@ st.dataframe(
 )
 
 
-# ==================================================
 # STOCK RANKING
-# ==================================================
 
 st.header("🏆 Stock Ranking")
 
@@ -460,10 +435,7 @@ st.dataframe(
     hide_index=True
 )
 
-
-# ==================================================
 # RISK VS RETURN
-# ==================================================
 
 st.header("⚖️ Risk vs Return")
 
@@ -503,9 +475,7 @@ st.caption(
 )
 
 
-# ==================================================
 # CORRELATION
-# ==================================================
 
 st.header("🔗 Stock Correlation")
 
@@ -545,9 +515,7 @@ st.caption(
 )
 
 
-# ==================================================
 # INDIVIDUAL STOCK ANALYSIS
-# ==================================================
 
 st.header("🔍 Individual Stock Analysis")
 
@@ -567,10 +535,8 @@ selected_metrics = metrics_df[
     metrics_df["Ticker"] == selected_stock
 ].iloc[0]
 
-
-# ==================================================
 # STOCK SUMMARY
-# ==================================================
+
 
 col1, col2, col3, col4 = st.columns(4)
 
@@ -606,10 +572,7 @@ with col4:
         f'{selected_metrics["Sharpe Ratio"]:.2f}'
     )
 
-
-# ==================================================
 # MOVING AVERAGES
-# ==================================================
 
 selected_data["MA20"] = (
     selected_data["Close"]
@@ -624,10 +587,7 @@ selected_data["MA50"] = (
     .mean()
 )
 
-
-# ==================================================
 # PRICE CHART
-# ==================================================
 
 st.subheader(
     f"{selected_stock} Price & Moving Averages"
@@ -669,10 +629,7 @@ st.plotly_chart(
     use_container_width=True
 )
 
-
-# ==================================================
 # TRADING VOLUME
-# ==================================================
 
 st.subheader(
     f"{selected_stock} Trading Volume"
@@ -697,9 +654,7 @@ st.plotly_chart(
 )
 
 
-# ==================================================
 # MAXIMUM DRAWDOWN
-# ==================================================
 
 st.subheader(
     f"{selected_stock} Drawdown"
@@ -746,10 +701,7 @@ st.plotly_chart(
     use_container_width=True
 )
 
-
-# ==================================================
 # ROLLING VOLATILITY
-# ==================================================
 
 st.subheader(
     f"{selected_stock} 30-Day Rolling Volatility"
@@ -798,10 +750,7 @@ st.plotly_chart(
     use_container_width=True
 )
 
-
-# ==================================================
 # SIMPLE ANALYTICAL INTERPRETATION
-# ==================================================
 
 st.header("💡 Analytics Summary")
 
@@ -850,10 +799,7 @@ if drawdown_value < -30:
         "selected period."
     )
 
-
-# ==================================================
 # FOOTER
-# ==================================================
 
 st.divider()
 
